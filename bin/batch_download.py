@@ -20,10 +20,14 @@ def batch_query(accessions_batch, db="nucleotide", retmax=RETMAX, batchsize=500)
     query = " ".join(accessions_batch)
     query_handle = Entrez.esearch(db=db, term=query, retmax=retmax)
     gi_list = Entrez.read(query_handle)["IdList"]
-
+    query_handle.close()
     # get GB files
     search_handle = Entrez.epost(db=db, id=",".join(gi_list))
-    search_results = Entrez.read(search_handle)
+    try:
+        search_results = Entrez.read(search_handle)
+    except:
+        sys.stderr.write(f"query={query}\ngi_list={gi_list}\n\nsearch_handle={search_handle}\n")
+        raise
     webenv, query_key = search_results["WebEnv"], search_results["QueryKey"]
     records_handle = Entrez.efetch(
         db=db, rettype="gb", retmax=batchsize, webenv=webenv, query_key=query_key
@@ -39,7 +43,6 @@ def batch(accessions, size=500):
 
 def main(acc_fp):
     batchsize = 500
-    out = sys.stdout
     err = sys.stderr
     verbose = True
 
@@ -52,14 +55,30 @@ def main(acc_fp):
     rec_ind = 1
 
     for abatch in batch(acc_list, size=batchsize):
+        ofn = f"records-{rec_ind}.gb"
+        if os.path.exists(ofn):
+            err.write(f"Skipping redownload of {ofn} ...\n")
+            rec_ind += len(abatch)
+            continue
         if rec_ind > 1:
+            err.write(f"Sleeping...\n")
             time.sleep(20)
         if verbose:
             err.write(f"Fetching records {rec_ind} to {len(abatch) + rec_ind}\n")
         rec_ind += len(abatch)
         records = batch_query(abatch, batchsize=batchsize)
-        for line in records:
-            out.write(line)
+        tfn = f".tmp-{ofn}"
+        try:
+            with open(tfn, "w") as out:
+                for line in records:
+                    out.write(line)
+            records.close()
+        except:
+            os.remove(tfn)
+            raise
+        else:
+            os.rename(tfn, ofn)
+
 
 
 if __name__ == "__main__":
