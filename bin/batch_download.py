@@ -53,16 +53,17 @@ def main(acc_fp):
     if not acc_list:
         raise RuntimeError("No accessions found")
     rec_ind = 1
-
+    first = True
     for abatch in batch(acc_list, size=batchsize):
         ofn = f"records-{rec_ind}.gb"
         if os.path.exists(ofn):
             err.write(f"Skipping redownload of {ofn} ...\n")
             rec_ind += len(abatch)
             continue
-        if rec_ind > 1:
+        if not first:
             err.write(f"Sleeping...\n")
             time.sleep(20)
+        first = False
         if verbose:
             err.write(f"Fetching records {rec_ind} to {len(abatch) + rec_ind}\n")
         rec_ind += len(abatch)
