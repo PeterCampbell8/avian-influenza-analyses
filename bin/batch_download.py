@@ -18,9 +18,21 @@ RETMAX = 10 ** 9
 def batch_query(accessions_batch, db="nucleotide", retmax=RETMAX, batchsize=500):
     # get GI for query accessions
     query = " ".join(accessions_batch)
-    query_handle = Entrez.esearch(db=db, term=query, retmax=retmax)
-    gi_list = Entrez.read(query_handle)["IdList"]
-    query_handle.close()
+    gi_list = []
+    try:
+        query_handle = Entrez.esearch(db=db,
+            term=query, retmax=retmax,
+            field="Accession")
+        qh_dict = Entrez.read(query_handle)
+        gi_list = qh_dict["IdList"]
+        query_handle.close()
+    except:
+        sys.stderr.write(f"query_handle={query_handle}\n")
+    if not gi_list:
+        sys.stderr.write(str(qh_dict))
+        sys.stderr.write('\n')
+        raise RuntimeError("No gi_list returned")
+
     # get GB files
     search_handle = Entrez.epost(db=db, id=",".join(gi_list))
     try:
