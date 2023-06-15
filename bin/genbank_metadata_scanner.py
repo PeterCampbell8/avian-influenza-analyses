@@ -19,6 +19,7 @@ def get_gbfiles_via_naming_conv(directory):
     fn_list = [i[1] for i in sortable]
     return fn_list
 
+
 def scan_metadata_in_file(filepath):
     with open(filepath) as handle:
         for record in GenBank.parse(handle):
@@ -29,9 +30,10 @@ def scan_metadata_in_file(filepath):
                     print(feat.__dict__)
             sys.exit("early\n")
 
+
 def main(fn_list):
     if fn_list is None:
-        msg ="No input file name supplied, assuming records-#.gb naming convention in cwd.\n"
+        msg = "No input file name supplied, assuming records-#.gb naming convention in cwd.\n"
         sys.stderr.write(msg)
         fn_list = get_gbfiles_via_naming_conv(os.curdir)
         if not fn_list:
@@ -40,7 +42,6 @@ def main(fn_list):
         if not os.path.isfile(fn):
             sys.exit(f'"{fn}" does not exist or is not a file.\n')
         scan_metadata_in_file(fn)
-
 
 
 if __name__ == "__main__":
