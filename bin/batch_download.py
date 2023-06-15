@@ -20,9 +20,9 @@ def batch_query(accessions_batch, db="nucleotide", retmax=RETMAX, batchsize=500)
     query = " ".join(accessions_batch)
     gi_list = []
     try:
-        query_handle = Entrez.esearch(db=db,
-            term=query, retmax=retmax,
-            field="Accession")
+        query_handle = Entrez.esearch(
+            db=db, term=query, retmax=retmax, field="Accession"
+        )
         qh_dict = Entrez.read(query_handle)
         gi_list = qh_dict["IdList"]
         query_handle.close()
@@ -30,7 +30,7 @@ def batch_query(accessions_batch, db="nucleotide", retmax=RETMAX, batchsize=500)
         sys.stderr.write(f"query_handle={query_handle}\n")
     if not gi_list:
         sys.stderr.write(str(qh_dict))
-        sys.stderr.write('\n')
+        sys.stderr.write("\n")
         raise RuntimeError("No gi_list returned")
 
     # get GB files
@@ -38,7 +38,9 @@ def batch_query(accessions_batch, db="nucleotide", retmax=RETMAX, batchsize=500)
     try:
         search_results = Entrez.read(search_handle)
     except:
-        sys.stderr.write(f"query={query}\ngi_list={gi_list}\n\nsearch_handle={search_handle}\n")
+        sys.stderr.write(
+            f"query={query}\ngi_list={gi_list}\n\nsearch_handle={search_handle}\n"
+        )
         raise
     webenv, query_key = search_results["WebEnv"], search_results["QueryKey"]
     records_handle = Entrez.efetch(
@@ -91,7 +93,6 @@ def main(acc_fp):
             raise
         else:
             os.rename(tfn, ofn)
-
 
 
 if __name__ == "__main__":
