@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 from Bio import GenBank
 import os
@@ -50,6 +50,15 @@ def get_gbfiles_via_naming_conv(directory):
 ORG_SRC_CROSSCHECK = False
 no_org = 0
 COUNTRY_SRC_CROSSCHECK = False
+STRAIN_CROSSCHECK = False
+
+
+def cleaned_val(key, qual_dict):
+    rval = qual_dict.get(key)
+    if rval is None:
+        return None
+    assert rval.startswith('"') and rval.endswith('"')
+    return rval[1:-1]
 
 
 def scan_metadata_in_file(filepath, key_list_vals=None):
@@ -73,10 +82,8 @@ def scan_metadata_in_file(filepath, key_list_vals=None):
                     if key_list_vals is not None and dec_key in qdict:
                         print(qdict[dec_key])
                     if ORG_SRC_CROSSCHECK:
-                        if "/organism=" in qdict:
-                            oval = qdict["/organism="]
-                            assert oval[0] == '"'
-                            oval = oval[1:-1]
+                        oval = cleaned_val("/organism=", qdict)
+                        if oval is not None:
                             if oval != record.source:
                                 sys.stderr.write(
                                     f"mismatch {repr(oval)} != {repr(record.source)} for {record.accession}\n"
@@ -84,16 +91,20 @@ def scan_metadata_in_file(filepath, key_list_vals=None):
                         else:
                             no_org += 1
                     if COUNTRY_SRC_CROSSCHECK:
-                        if "/country=" in qdict:
-                            cval = qdict["/country="]
-                            assert cval[0] == '"'
-                            cval = cval[1:-1]
+                        cval = cleaned_val("/country=", qdict)
+                        if cval is not None:
                             if cval not in record.source:
                                 sys.stderr.write(
                                     f"mismatch {repr(cval)} != {repr(record.source)} for {record.accession}\n"
                                 )
-                        else:
-                            no_org += 1
+                    if STRAIN_CROSSCHECK:
+                        sval = cleaned_val("/strain=", qdict)
+                        if sval is not None:
+                            if sval not in record.source:
+                                sys.stderr.write(
+                                    f"mismatch {repr(sval)} != {repr(record.source)} for {record.accession}\n"
+                                )
+
             # sys.exit("early\n")
 
 

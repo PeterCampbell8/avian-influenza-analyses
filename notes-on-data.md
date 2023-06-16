@@ -9,6 +9,10 @@ Frequencies below are based on 87,095 records of PB2 (all from a query of influe
 
   * `bio_material` **IGNORE (for now):** followed by an sample code such as `"CEIRS#..."`  (`SCV:` and `SMMU` also seen). See https://www.niaidceirs.org/ceirs-surveillance-data/ 
 
+  * `clone` **IGNORE, I think** might want to check for duplicates. rarely used. 
+
+  * `collected_by` **IGNORE**
+
   * `collection_date` sometimes just a year, sometimes `%d-%b-%Y`
 
   * `country` It's complicated. Often duplicate of the geographic info in the `SOURCE` field, sometimes more or less precise.
@@ -28,5 +32,9 @@ Frequencies below are based on 87,095 records of PB2 (all from a query of influe
   * `note` **IGNORE** potentially interesting info sometimes, but free-form text will be too hard to deal with.
 
   * `PCR_primers` **IGNORE**
+
+  * `strain` Often duplicate of the strain info in `SOURCE`, but sometimes `SOURCE` lacks the strain info and it is only found here. Other times there are trivial differences. Other times, one is more precise than the other.
+
+  * `serotype` sometimes this info is in the `SOURCE` too, but it seems more reliable here. **TODO** need to check if it is ever only in `SOURCE` or whether it is safe to just use this field.
 
   * `tissue_type` **IGNORE** very rarely used. Anatomical source of sample.
