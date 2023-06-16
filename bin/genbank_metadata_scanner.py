@@ -47,9 +47,15 @@ def get_gbfiles_via_naming_conv(directory):
     return fn_list
 
 
+ORG_SRC_CROSSCHECK = True
+no_org = 0
+
+
 def scan_metadata_in_file(filepath, key_list_vals=None):
+    global no_org
     if key_list_vals is not None:
         dec_key = f"/{key_list_vals}="
+
     with open(filepath) as handle:
         for record in GenBank.parse(handle):
             # print(record.source)
@@ -65,7 +71,17 @@ def scan_metadata_in_file(filepath, key_list_vals=None):
                             raise RuntimeError(f"Unknown keys in {record.accession}")
                     if key_list_vals is not None and dec_key in qdict:
                         print(qdict[dec_key])
-
+                    if ORG_SRC_CROSSCHECK:
+                        if "/organism=" in qdict:
+                            oval = qdict["/organism="]
+                            assert oval[0] == '"'
+                            oval = oval[1:-1]
+                            if oval != record.source:
+                                sys.stderr.write(
+                                    f"mismatch {repr(oval)} != {repr(record.source)} for {record.accession}\n"
+                                )
+                        else:
+                            no_org += 1
             # sys.exit("early\n")
 
 
@@ -80,6 +96,8 @@ def main_parsed(fn_list, key_list_vals=None):
         if not os.path.isfile(fn):
             sys.exit(f'"{fn}" does not exist or is not a file.\n')
         scan_metadata_in_file(fn, key_list_vals=key_list_vals)
+    if ORG_SRC_CROSSCHECK:
+        sys.stderr.write(f"{no_org} records with no organism qualifiers")
 
 
 def main():
