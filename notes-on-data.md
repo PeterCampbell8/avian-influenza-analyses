@@ -18,3 +18,7 @@ Frequencies below are based on 87,095 records of PB2 (all from a query of influe
   * `lat_lon` as expected "[float] {N,S} [float] {E,W}"
 
   * `organism` **IGNORE:** Always present and almost always the same as top-level `SOURCE` field. In a tiny # of cases a space appears in the biopython read of a record which causes the 2 to differ.
+  
+  * `PCR_primers` **IGNORE**
+
+  * `country` It's complicated. Often duplicate of the geographic info in the `SOURCE` field, sometimes more or less precise.

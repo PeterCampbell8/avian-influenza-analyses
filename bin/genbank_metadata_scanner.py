@@ -47,8 +47,9 @@ def get_gbfiles_via_naming_conv(directory):
     return fn_list
 
 
-ORG_SRC_CROSSCHECK = True
+ORG_SRC_CROSSCHECK = False
 no_org = 0
+COUNTRY_SRC_CROSSCHECK = False
 
 
 def scan_metadata_in_file(filepath, key_list_vals=None):
@@ -79,6 +80,17 @@ def scan_metadata_in_file(filepath, key_list_vals=None):
                             if oval != record.source:
                                 sys.stderr.write(
                                     f"mismatch {repr(oval)} != {repr(record.source)} for {record.accession}\n"
+                                )
+                        else:
+                            no_org += 1
+                    if COUNTRY_SRC_CROSSCHECK:
+                        if "/country=" in qdict:
+                            cval = qdict["/country="]
+                            assert cval[0] == '"'
+                            cval = cval[1:-1]
+                            if cval not in record.source:
+                                sys.stderr.write(
+                                    f"mismatch {repr(cval)} != {repr(record.source)} for {record.accession}\n"
                                 )
                         else:
                             no_org += 1
